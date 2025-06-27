@@ -29,7 +29,7 @@ Fiz questão de fazer tudo do zero sem pegar nada pronto do meu arsenal ou copia
 
 
 
-# 🚀 Teste Prático - API REST Laravel para Job Applications
+# 🚀  API REST Laravel para Job Applications e dados climaticos em lote
 
 Este documento descreve como configurar, executar e utilizar a API REST desenvolvida em Laravel para gerenciamento de vagas de emprego, candidaturas e análise de dados climáticos.
 
