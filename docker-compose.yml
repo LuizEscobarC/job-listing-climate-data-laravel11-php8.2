@@ -1,0 +1,186 @@
+services:
+  # Serviço PHP-FPM com Laravel
+  app-estech:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: app-estech-api
+    restart: unless-stopped
+    working_dir: /var/www
+    entrypoint: ["/usr/local/bin/entrypoint-web.sh"]
+    volumes:
+      - ./:/var/www
+      - ./docker/config/php.ini:/usr/local/etc/php/conf.d/custom.ini
+    environment:
+      - APP_ENV=${APP_ENV:-local}
+      - APP_DEBUG=${APP_DEBUG:-true}
+    user: root
+    tty: true
+    depends_on:
+      db-estech:
+        condition: service_healthy
+      redis-estech:
+        condition: service_healthy
+    networks:
+      - estech-network
+    # Limitação de recursos
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "php", "artisan", "--version"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Servidor Nginx para API
+  nginx-estech:
+    image: nginx:alpine
+    container_name: nginx-estech-api
+    restart: unless-stopped
+    ports:
+      - "${API_PORT:-8000}:80"
+    volumes:
+      - ./:/var/www
+      - ./docker/config/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      app-estech:
+        condition: service_healthy
+    networks:
+      - estech-network
+    # Limitação de recursos
+    deploy:
+      resources:
+        limits:
+          cpus: '0.3'
+          memory: 128M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:80/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Banco de dados MySQL
+  db-estech:
+    image: mysql:8.0
+    container_name: db-estech-api
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-laravel}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+      MYSQL_USER: ${DB_USERNAME:-laravel}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-laravel}
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+      - ./docker/config/mysql:/etc/mysql/conf.d
+    networks:
+      - estech-network
+    # Limitação de recursos
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-root}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Redis
+  redis-estech:
+    image: redis:alpine
+    container_name: redis-estech-api
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redisdata:/data
+    networks:
+      - estech-network
+    # Limitação de recursos
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # Queue Workers
+  queue-workers:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.queue
+    container_name: queue-workers-estech
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+    environment:
+      - APP_ENV=${APP_ENV:-local}
+      - APP_DEBUG=${APP_DEBUG:-true}
+    depends_on:
+      app-estech:
+        condition: service_healthy
+      db-estech:
+        condition: service_healthy
+      redis-estech:
+        condition: service_healthy
+    networks:
+      - estech-network
+    user: root
+    tty: true
+    # Limitação de recursos
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 768M
+        reservations:
+          cpus: '0.5'
+          memory: 384M
+    healthcheck:
+      test: ["CMD", "supervisorctl", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  dbdata:
+    driver: local
+  redisdata:
+    driver: local
+
+networks:
+  estech-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/16
+          gateway: 172.20.0.1

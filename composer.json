@@ -1,0 +1,62 @@
+{
+    "name": "luizescobal/teste-dev-backend",
+    "description": "Projeto Laravel 11",
+    "type": "project",
+    "require": {
+        "php": "^8.2",
+        "laravel/framework": "^11.0",
+        "laravel/tinker": "^2.10",
+        "laravel/sanctum": "^4.0",
+        "fakerphp/faker": "^1.24",
+        "guzzlehttp/guzzle": "^7.8",
+        "predis/predis": "^2.0",
+        "laravel/telescope": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/",
+            "Database\\Factories\\": "database/factories/",
+            "Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "post-autoload-dump": [
+            "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
+            "@php artisan package:discover --ansi"
+        ],
+        "post-root-package-install": [
+            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
+        ],
+        "post-create-project-cmd": [
+            "@php artisan key:generate --ansi"
+        ],
+        "test": [
+            "./vendor/bin/phpunit"
+        ],
+        "test-f": [
+            "./vendor/bin/phpunit --filter"
+        ]
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "require-dev": {
+        "phpunit/phpunit": "*",
+        "mockery/mockery": "^1.6",
+        "nunomaduro/collision": "^8.0",
+        "spatie/laravel-ignition": "^2.4",
+        "laravel/sail": "^1.26",
+        "laravel/pint": "^1.13",
+        "pestphp/pest": "^2.30",
+        "pestphp/pest-plugin-laravel": "^2.2"
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    }
+}
