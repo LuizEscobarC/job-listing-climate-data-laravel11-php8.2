@@ -1,3 +1,34 @@
+## Buenas! 
+
+**Tudo o que precisa está no teste-pratico.ms.**
+
+Fiz questão de fazer tudo do zero sem pegar nada pronto do meu arsenal ou copiado do que já trabalho hoje, então tudo aqui é legítimo e unicamente pensado únicamente ao projeto.
+
+
+
+### Imagens:
+
+**shell para deixar todo ambiente de pé:**
+
+![image](https://github.com/user-attachments/assets/2fd1b649-f708-4100-8f49-dd0b31237c0f)
+
+
+
+**Telescope para acompanhar TUDO o que está rolando:**
+
+**Jobs/Queues**
+
+![image](https://github.com/user-attachments/assets/80906ae4-e8c2-4c78-ae3f-589aea6e48e3)
+
+**Cache Tag**
+
+![image](https://github.com/user-attachments/assets/3b93bce0-f4a6-42f0-863f-02b19e54cbbe)
+
+
+**E por aí vai...**
+
+
+
 # 🚀 Teste Prático - API REST Laravel para Job Applications
 
 Este documento descreve como configurar, executar e utilizar a API REST desenvolvida em Laravel para gerenciamento de vagas de emprego, candidaturas e análise de dados climáticos.
